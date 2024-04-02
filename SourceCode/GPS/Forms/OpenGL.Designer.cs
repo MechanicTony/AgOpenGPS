@@ -22,6 +22,8 @@ namespace AgOpenGPS
 
         //data buffer for pixels read from off screen buffer
         byte[] rateRed = new byte[1];
+        byte[] rateRedL = new byte[1];
+        byte[] rateRedR = new byte[1];
         byte[] rateGrn = new byte[1];
         byte[] rateBlu = new byte[1];
 
@@ -1235,13 +1237,23 @@ namespace AgOpenGPS
                     GL.TexCoord2(0.0, 1);
                     GL.Vertex3(worldGrid.eastingMinRate, worldGrid.northingMinRate, 0.10);
                     GL.TexCoord2(1, 1);
-                    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.0);
+                    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.10);
                     GL.End();
 
                     GL.Flush();
 
-                    //read the whole block of pixels up to max lookahead, one read only
-                    GL.ReadPixels(250, 1, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.Red, PixelType.UnsignedByte, rateRed);
+                    //Read pixels at green ON lookahead line
+                    int rateLookaheadCenter = (int)((tool.lookAheadDistanceOnPixelsLeft + tool.lookAheadDistanceOnPixelsRight) * 0.5);
+                    int rateLookaheadCenterL = (int)((tool.lookAheadDistanceOnPixelsLeft + rateLookaheadCenter) * 0.5);
+                    int rateLookaheadCenterR = (int)((rateLookaheadCenter + tool.lookAheadDistanceOnPixelsRight) * 0.5);
+
+                    int ratePixelsCenter = (int)(tool.rpXPosition + (tool.rpWidth * 0.50));
+                    int ratePixelsCenterL = (int)(tool.rpXPosition + (tool.rpWidth * 0.25));
+                    int ratePixelsCenterR = (int)(tool.rpXPosition + (tool.rpWidth * 0.75));
+
+                    GL.ReadPixels(ratePixelsCenter, rateLookaheadCenter, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.Red, PixelType.UnsignedByte, rateRed);
+                    GL.ReadPixels(ratePixelsCenterL, rateLookaheadCenterL, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.Red, PixelType.UnsignedByte, rateRedL);
+                    GL.ReadPixels(ratePixelsCenterR, rateLookaheadCenterR, 1, 1, OpenTK.Graphics.OpenGL.PixelFormat.Red, PixelType.UnsignedByte, rateRedR);
                 }
 
                 ////second channel
@@ -1259,7 +1271,7 @@ namespace AgOpenGPS
                 //    GL.TexCoord2(0.0, 1);
                 //    GL.Vertex3(worldGrid.eastingMinRate, worldGrid.northingMinRate, 0.10);
                 //    GL.TexCoord2(1, 1);
-                //    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.0);
+                //    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.10);
                 //    GL.End();
 
                 //    GL.Flush();
@@ -1283,7 +1295,7 @@ namespace AgOpenGPS
                 //    GL.TexCoord2(0.0, 1);
                 //    GL.Vertex3(worldGrid.eastingMinRate, worldGrid.northingMinRate, 0.10);
                 //    GL.TexCoord2(1, 1);
-                //    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.0);
+                //    GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0.10);
                 //    GL.End();
 
 
@@ -1295,16 +1307,18 @@ namespace AgOpenGPS
 
                 GL.Disable(EnableCap.Texture2D);
 
-                byte per = (byte)(Math.Round(((double)(rateRed[0]) / 2.55), MidpointRounding.AwayFromZero));
-                //lblRed.Text = per.ToString() + "%";
-                btnSection1Man.Text = per.ToString() + "%";
+                byte rate = (byte)(Math.Round(((double)(rateRed[0]) / 2.55), MidpointRounding.AwayFromZero));
+                byte rateL = (byte)(Math.Round(((double)(rateRedL[0]) / 2.55), MidpointRounding.AwayFromZero));
+                byte rateR = (byte)(Math.Round(((double)(rateRedR[0]) / 2.55), MidpointRounding.AwayFromZero));
+                byte rateAvg = (byte)((rateL * 0.3) + (rate * 0.4) + (rateR * 0.3));
+                btnSection1Man.Text = rateAvg.ToString() + "%";
                 //CExtensionMethods.SetProgressNoAnimation(pbarRate, per);
 
                 //lblGrn.Text = rateGrn[0].ToString();
                 //lblBlu.Text = rateBlu[0].ToString();
 
                 //Red, Green, Blu
-                p_228.pgn[p_228.rate0] = per; 
+                p_228.pgn[p_228.rate0] = rateAvg; 
                 p_228.pgn[p_228.rate1] = (byte)rateGrn[0];
                 p_228.pgn[p_228.rate2] = (byte)rateBlu[0];
 

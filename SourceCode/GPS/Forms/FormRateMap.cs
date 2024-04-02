@@ -135,17 +135,32 @@ namespace AgOpenGPS
 
             mf.worldGrid.isRateMap = true;
 
-            CornerPoint geoRef = mapControl.TopLeftCorner;
-            mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out double nor, out double eas);
-            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isRateMap = false;
-            mf.worldGrid.northingMaxRate = nor;
-            mf.worldGrid.eastingMinRate = eas;
+            CornerPoint geoRef;
 
-            geoRef = mapControl.BottomRightCorner;
-            mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out nor, out eas);
-            if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isRateMap = false;
-            mf.worldGrid.northingMinRate = nor;
-            mf.worldGrid.eastingMaxRate = eas;
+            if(mf.maxFieldY == 0 && mf.minFieldY == 0 && mf.maxFieldX == 0 && mf.minFieldX == 0)
+            {
+                geoRef = mapControl.TopLeftCorner;
+                mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out double nor, out double eas);
+                if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isRateMap = false;
+                mf.worldGrid.northingMaxRate = nor;
+                mf.worldGrid.eastingMinRate = eas;
+
+                geoRef = mapControl.BottomRightCorner;
+                mf.pn.ConvertWGS84ToLocal(geoRef.Latitude, geoRef.Longitude, out nor, out eas);
+                if (Math.Abs(nor) > 4000 || Math.Abs(eas) > 4000) mf.worldGrid.isRateMap = false;
+                mf.worldGrid.northingMinRate = nor;
+                mf.worldGrid.eastingMaxRate = eas;
+            }
+            else
+            {
+                mf.TimedMessageBox(2000, "RateMap1.png", "Replace With Field Clipped Image");
+
+                mf.worldGrid.northingMaxRate = mf.maxFieldY; //minFieldX
+                mf.worldGrid.eastingMinRate = mf.minFieldX;
+
+                mf.worldGrid.northingMinRate = mf.minFieldY;
+                mf.worldGrid.eastingMaxRate = mf.maxFieldX;
+            }
 
             if (!mf.worldGrid.isRateMap)
             {

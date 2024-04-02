@@ -2312,6 +2312,11 @@ namespace AgOpenGPS
                     writer.WriteLine(worldGrid.northingMinRate.ToString(CultureInfo.InvariantCulture));
                     writer.WriteLine(worldGrid.numRateChannels.ToString(CultureInfo.InvariantCulture));
 
+                    //WSG84 Points 
+                    writer.WriteLine("East, North");
+                    writer.WriteLine(pn.GetLocalToWSG84_KML(worldGrid.eastingMaxRate, worldGrid.northingMaxRate));
+                    writer.WriteLine("West, South");
+                    writer.WriteLine(pn.GetLocalToWSG84_KML(worldGrid.eastingMinRate, worldGrid.northingMinRate));
                 }
                 else
                 {
