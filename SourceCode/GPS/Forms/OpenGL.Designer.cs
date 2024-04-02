@@ -591,6 +591,28 @@ namespace AgOpenGPS
 
             #region Draw to Back Buffer
 
+            //** Section Control Map - Start **
+            if (worldGrid.isRateMap)
+            {
+                GL.Enable(EnableCap.Texture2D);
+
+                GL.BindTexture(TextureTarget.Texture2D, texture[(int)textures.RateMap1]);
+                GL.Begin(PrimitiveType.TriangleStrip);
+                GL.Color3(0.0f, 0.5f, 0.0f);
+                GL.TexCoord2(0, 0);
+                GL.Vertex3(worldGrid.eastingMinRate, worldGrid.northingMaxRate, 0);
+                GL.TexCoord2(1, 0.0);
+                GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMaxRate, 0);
+                GL.TexCoord2(0.0, 1);
+                GL.Vertex3(worldGrid.eastingMinRate, worldGrid.northingMinRate, 0);
+                GL.TexCoord2(1, 1);
+                GL.Vertex3(worldGrid.eastingMaxRate, worldGrid.northingMinRate, 0);
+                GL.End();
+
+                GL.Flush();
+            }
+            //** Section Control Map - End **
+
             //patch color
             GL.Color3(0.0f, 0.5f, 0.0f);
 
